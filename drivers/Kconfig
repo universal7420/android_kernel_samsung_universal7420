@@ -197,6 +197,8 @@ source "drivers/fingerprint/Kconfig"
 
 source "drivers/gud/Kconfig"
 
+source "drivers/android/Kconfig"
+
 source "drivers/gator/Kconfig"
 
 source "drivers/trace/Kconfig"
