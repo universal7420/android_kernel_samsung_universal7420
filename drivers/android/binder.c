@@ -331,14 +331,14 @@ enum {
 	BINDER_LOOPER_STATE_EXITED      = 0x04,
 	BINDER_LOOPER_STATE_INVALID     = 0x08,
 	BINDER_LOOPER_STATE_WAITING     = 0x10,
-	BINDER_LOOPER_STATE_NEED_RETURN = 0x20
 };
 
 struct binder_thread {
 	struct binder_proc *proc;
 	struct rb_node rb_node;
 	int pid;
-	int looper;
+	int looper;              /* only modified by this thread */
+	bool looper_need_return; /* can be written by other thread */
 	struct binder_transaction *transaction_stack;
 	struct list_head todo;
 	uint32_t return_error; /* Write failed, return error code in read buf */
@@ -2263,14 +2263,13 @@ void binder_stat_br(struct binder_proc *proc, struct binder_thread *thread,
 static int binder_has_proc_work(struct binder_proc *proc,
 				struct binder_thread *thread)
 {
-	return !list_empty(&proc->todo) ||
-		(thread->looper & BINDER_LOOPER_STATE_NEED_RETURN);
+	return !list_empty(&proc->todo) || thread->looper_need_return;
 }
 
 static int binder_has_thread_work(struct binder_thread *thread)
 {
 	return !list_empty(&thread->todo) || thread->return_error != BR_OK ||
-		(thread->looper & BINDER_LOOPER_STATE_NEED_RETURN);
+		thread->looper_need_return;
 }
 
 static int binder_put_node_cmd(struct binder_proc *proc,
@@ -2390,12 +2389,15 @@ retry:
 		struct binder_work *w;
 		struct binder_transaction *t = NULL;
 
-		if (!list_empty(&thread->todo))
-			w = list_first_entry(&thread->todo, struct binder_work, entry);
-		else if (!list_empty(&proc->todo) && wait_for_proc_work)
-			w = list_first_entry(&proc->todo, struct binder_work, entry);
-		else {
-			if (ptr - buffer == 4 && !(thread->looper & BINDER_LOOPER_STATE_NEED_RETURN)) /* no data added */
+		if (!list_empty(&thread->todo)) {
+			w = list_first_entry(&thread->todo, struct binder_work,
+					     entry);
+		} else if (!list_empty(&proc->todo) && wait_for_proc_work) {
+			w = list_first_entry(&proc->todo, struct binder_work,
+					     entry);
+		} else {
+			/* no data added */
+			if (ptr - buffer == 4 && !thread->looper_need_return)
 				goto retry;
 			break;
 		}
@@ -2706,7 +2708,7 @@ static struct binder_thread *binder_get_thread(struct binder_proc *proc)
 		INIT_LIST_HEAD(&thread->todo);
 		rb_link_node(&thread->rb_node, parent, p);
 		rb_insert_color(&thread->rb_node, &proc->threads);
-		thread->looper |= BINDER_LOOPER_STATE_NEED_RETURN;
+		thread->looper_need_return = true;
 		thread->return_error = BR_OK;
 		thread->return_error2 = BR_OK;
 	}
@@ -3020,7 +3022,7 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	ret = 0;
 err:
 	if (thread)
-		thread->looper &= ~BINDER_LOOPER_STATE_NEED_RETURN;
+		thread->looper_need_return = false;
 	binder_unlock(__func__);
 	wait_event_interruptible(binder_user_error_wait, binder_stop_on_user_error < 2);
 	if (ret && ret != -ERESTARTSYS)
@@ -3164,7 +3166,8 @@ static void binder_deferred_flush(struct binder_proc *proc)
 	int wake_count = 0;
 	for (n = rb_first(&proc->threads); n != NULL; n = rb_next(n)) {
 		struct binder_thread *thread = rb_entry(n, struct binder_thread, rb_node);
-		thread->looper |= BINDER_LOOPER_STATE_NEED_RETURN;
+
+		thread->looper_need_return = true;
 		if (thread->looper & BINDER_LOOPER_STATE_WAITING) {
 			wake_up_interruptible(&thread->wait);
 			wake_count++;
@@ -3422,7 +3425,9 @@ static void print_binder_thread(struct seq_file *m,
 	size_t start_pos = m->count;
 	size_t header_pos;
 
-	seq_printf(m, "  thread %d: l %02x\n", thread->pid, thread->looper);
+	seq_printf(m, "  thread %d: l %02x need_return %d\n",
+			thread->pid, thread->looper,
+			thread->looper_need_return);
 	header_pos = m->count;
 	t = thread->transaction_stack;
 	while (t) {
