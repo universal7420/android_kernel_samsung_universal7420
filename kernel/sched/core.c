@@ -73,6 +73,7 @@
 #include <linux/init_task.h>
 #include <linux/binfmts.h>
 #include <linux/context_tracking.h>
+#include <linux/cpufreq.h>
 #include <linux/exynos-ss.h>
 
 #include <linux/sched/sysctl.h>
@@ -1665,6 +1666,10 @@ static void __sched_fork(struct task_struct *p)
 #endif
 #ifdef CONFIG_SCHEDSTATS
 	memset(&p->se.statistics, 0, sizeof(p->se.statistics));
+#endif
+
+#ifdef CONFIG_CPU_FREQ_STAT
+	cpufreq_task_stats_init(p);
 #endif
 
 	INIT_LIST_HEAD(&p->rt.run_list);
