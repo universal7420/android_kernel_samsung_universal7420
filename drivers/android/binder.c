@@ -2014,8 +2014,8 @@ int binder_thread_write(struct binder_proc *proc, struct binder_thread *thread,
 				return -EFAULT;
 			ptr += sizeof(void *);
 
-			buffer = binder_alloc_buffer_lookup(&proc->alloc,
-							    data_ptr);
+			buffer = binder_alloc_prepare_to_free(&proc->alloc,
+							      data_ptr);
 			if (buffer == NULL) {
 				binder_user_error("%d:%d BC_FREE_BUFFER u%p no match\n",
 					proc->pid, thread->pid, data_ptr);
