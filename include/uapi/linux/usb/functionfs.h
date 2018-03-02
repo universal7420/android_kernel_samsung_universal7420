@@ -14,11 +14,7 @@ enum {
 	FUNCTIONFS_DESCRIPTORS_MAGIC_V2 = 3,
 };
 
-enum functionfs_flags {
-	FUNCTIONFS_HAS_FS_DESC = 1,
-	FUNCTIONFS_HAS_HS_DESC = 2,
-	FUNCTIONFS_HAS_SS_DESC = 4,
-};
+#define FUNCTIONFS_SS_DESC_MAGIC 0x0055DE5C
 
 #ifndef __KERNEL__
 
@@ -80,11 +76,12 @@ struct usb_functionfs_descs_head {
  * |  12 | hs_count  | LE32         | number of high-speed descriptors     |
  * |  16 | fs_descrs | Descriptor[] | list of full-speed descriptors       |
  * |     | hs_descrs | Descriptor[] | list of high-speed descriptors       |
+ * |     | ss_magic  | LE32         | FUNCTIONFS_SS_DESC_MAGIC             |
+ * |     | ss_count  | LE32         | number of super-speed descriptors    |
+ * |     | ss_descrs | Descriptor[] | list of super-speed descriptors      |
  *
- * All numbers must be in little endian order.
- *
- * Descriptor[] is an array of valid USB descriptors which have the following
- * format:
+ * ss_magic: if present then it implies that SS_DESCs are also present
+ * descs are just valid USB descriptors and have the following format:
  *
  * | off | name            | type | description              |
  * |-----+-----------------+------+--------------------------|
