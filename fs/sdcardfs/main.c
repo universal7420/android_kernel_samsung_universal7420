@@ -33,6 +33,8 @@ enum {
 	Opt_userid,
 	Opt_reserved_mb,
 	Opt_gid_derivation,
+	Opt_default_normal,
+	Opt_nocache,
 	Opt_err,
 };
 
@@ -46,6 +48,7 @@ static const match_table_t sdcardfs_tokens = {
 	{Opt_multiuser, "multiuser"},
 	{Opt_gid_derivation, "derive_gid"},
 	{Opt_reserved_mb, "reserved_mb=%u"},
+	{Opt_nocache, "nocache"},
 	{Opt_err, NULL}
 };
 
@@ -66,12 +69,10 @@ static int parse_options(struct super_block *sb, char *options, int silent,
 	vfsopts->gid = 0;
 	/* by default, 0MB is reserved */
 	opts->reserved_mb = 0;
-#if ANDROID_VERSION > 80000
 	/* by default, gid derivation is off */
 	opts->gid_derivation = false;
-#else
-	opts->gid_derivation = true;
-#endif
+	opts->default_normal = false;
+	opts->nocache = false;
 
 	*debug = 0;
 
@@ -125,6 +126,12 @@ static int parse_options(struct super_block *sb, char *options, int silent,
 			break;
 		case Opt_gid_derivation:
 			opts->gid_derivation = true;
+			break;
+		case Opt_default_normal:
+			opts->default_normal = true;
+			break;
+		case Opt_nocache:
+			opts->nocache = true;
 			break;
 		/* unknown option */
 		default:
