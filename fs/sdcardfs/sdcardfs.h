@@ -245,6 +245,11 @@ struct sdcardfs_mount_options {
 	userid_t fs_user_id;
 	bool multiuser;
 	bool gid_derivation;
+<<<<<<< HEAD
+=======
+	bool default_normal;
+	bool unshared_obb;
+>>>>>>> b54a3de... ANDROID: sdcardfs: Add option to not link obb
 	unsigned int reserved_mb;
 	bool nocache;
 };
