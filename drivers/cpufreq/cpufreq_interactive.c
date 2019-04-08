@@ -812,19 +812,9 @@ static void cpufreq_interactive_timer(unsigned long data)
 	spin_lock_irqsave(&speedchange_cpumask_lock, flags);
 	cpumask_set_cpu(data, &speedchange_cpumask);
 	spin_unlock_irqrestore(&speedchange_cpumask_lock, flags);
-	wake_up_process(tunables->speedchange_task);
 
-rearm_if_notmax:
-	/*
-	 * Already set max speed and don't see a need to change that,
-	 * wait until next idle to re-evaluate, don't need timer.
-	 */
-	if (pcpu->target_freq == pcpu->policy->max)
-#ifdef CONFIG_MODE_AUTO_CHANGE
-		goto rearm;
-#else
-		goto exit;
-#endif
+	if (tunables->speedchange_task)
+	    wake_up_process_no_notif(tunables->speedchange_task);
 
 rearm:
 	if (!timer_pending(&pcpu->cpu_timer))
