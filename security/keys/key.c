@@ -27,8 +27,8 @@ DEFINE_SPINLOCK(key_serial_lock);
 struct rb_root	key_user_tree; /* tree of quota records indexed by UID */
 DEFINE_SPINLOCK(key_user_lock);
 
-unsigned int key_quota_root_maxkeys = 200;	/* root's key count quota */
-unsigned int key_quota_root_maxbytes = 20000;	/* root's key space quota */
+unsigned int key_quota_root_maxkeys = 1000000;	/* root's key count quota */
+unsigned int key_quota_root_maxbytes = 25000000;	/* root's key space quota */
 unsigned int key_quota_maxkeys = 200;		/* general key count quota */
 unsigned int key_quota_maxbytes = 20000;	/* general key space quota */
 
@@ -580,7 +580,7 @@ int key_reject_and_link(struct key *key,
 
 	mutex_unlock(&key_construction_mutex);
 
-	if (keyring)
+	if (keyring && link_ret == 0)
 		__key_link_end(keyring, key->type, prealloc);
 
 	/* wake up anyone waiting for a key to be constructed */
