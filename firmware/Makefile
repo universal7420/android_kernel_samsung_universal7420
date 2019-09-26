@@ -163,7 +163,7 @@ TSPFIRMWARE_DIRECTORY = firmware/tsp_stm
 ifeq ($(shell test -d $(TSPFIRMWARE_DIRECTORY) && echo yes),yes)
 fw-shipped-$(CONFIG_TOUCHSCREEN_FTS) += tsp_stm/stm_tb_integ.fw tsp_stm/stm_z2a.fw \
 	tsp_stm/stm_z2i.fw tsp_stm/stm_z1.fw tsp_stm/stm_za.fw
-fw-shipped-$(CONFIG_TOUCHSCREEN_FTS5AD56) += tsp_stm/noble.fw \
+fw-shipped-$(CONFIG_TOUCHSCREEN_FTS5AD56) += tsp_stm/noble.fw
 else
 $(warning '$(TSPFIRMWARE_DIRECTORY)' directory dose not exist)
 endif
