@@ -386,3 +386,8 @@ config SEC_BAT_AUT
 	help
 	  Samsung TN Bat Automation Test
 
+config BOARD_NOBLELTE
+	bool "Samsung Galaxy Note 5 intl"
+	depends on SOC_EXYNOS7420
+	default n
+
