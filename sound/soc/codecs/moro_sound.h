@@ -40,17 +40,17 @@ int get_speaker_gain(void);
 // headphone levels
 #define HEADPHONE_DEFAULT		113
 #define HEADPHONE_MIN 			60
-#define HEADPHONE_MAX 			190
+#define HEADPHONE_MAX 			160
 
 // earpiece levels
 #define EARPIECE_DEFAULT		128
 #define EARPIECE_MIN 			60
-#define EARPIECE_MAX 			190
+#define EARPIECE_MAX 			160
 
 // speaker levels
 #define SPEAKER_DEFAULT			20
 #define SPEAKER_MIN 			0
-#define SPEAKER_MAX 			63
+#define SPEAKER_MAX 			35
 
 // Mixers sources
 #define OUT1L_MIX_DEFAULT		32
