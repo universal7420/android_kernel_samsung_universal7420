@@ -1170,7 +1170,7 @@ int _regmap_write(struct regmap *map, unsigned int reg,
 	int ret;
 	void *context = _regmap_map_get_context(map);
 
- 	val = moro_sound_write_hook(reg, val);	
+ 	val = moro_sound_write_hook(reg, val);
 
 	if (!map->cache_bypass && !map->defer_caching) {
 		ret = regcache_write(map, reg, val);
@@ -1217,7 +1217,7 @@ int _regmap_write_nohook(struct regmap *map, unsigned int reg,
 		dev_info(map->dev, "%x <= %x\n", reg, val);
 #endif
 
-	trace_regmap_reg_write(map, reg, val);
+	trace_regmap_reg_write(map->dev, reg, val);
 
 	return map->reg_write(context, reg, val);
 }
