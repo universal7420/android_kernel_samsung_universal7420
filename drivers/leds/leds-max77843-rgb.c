@@ -35,7 +35,9 @@
 #include <linux/interrupt.h>
 #include <linux/init.h>
 #include <linux/device.h>
+#ifdef CONFIG_LEDS_MAX77843_RGB_CONTROL
 #include <linux/sysfs_helpers.h>
+#endif
 #include <linux/platform_device.h>
 #include <linux/leds.h>
 #include <linux/err.h>
@@ -144,7 +146,7 @@ struct max77843_rgb {
 	unsigned int delay_off_times_ms;
 };
 
-#ifdef SEC_LED_SPECIFIC
+#ifdef CONFIG_LEDS_MAX77843_RGB_CONTROL
 static struct leds_control {
     u8 	current_low;
     u8 	current_high;
@@ -560,7 +562,9 @@ static ssize_t store_max77843_rgb_lowpower(struct device *dev,
 {
 	int ret;
 	u8 led_lowpower;
+	#ifdef CONFIG_LEDS_MAX77843_RGB_CONTROL
     struct max77843_rgb *max77843_rgb = dev_get_drvdata(dev);
+	#endif
 
 	ret = kstrtou8(buf, 0, &led_lowpower);
 	if (ret != 0) {
@@ -569,11 +573,14 @@ static ssize_t store_max77843_rgb_lowpower(struct device *dev,
 	}
 
 	led_lowpower_mode = led_lowpower;
+
+	#ifdef CONFIG_LEDS_MAX77843_RGB_CONTROL
     led_dynamic_current = (led_lowpower_mode) ? leds_control.current_low : leds_control.current_high;
 
     max77843_rgb_set_state(&max77843_rgb->led[RED], led_dynamic_current, LED_BLINK);
     max77843_rgb_set_state(&max77843_rgb->led[GREEN], led_dynamic_current, LED_BLINK);
     max77843_rgb_set_state(&max77843_rgb->led[BLUE], led_dynamic_current, LED_BLINK);
+	#endif
 
 	dev_dbg(dev, "led_lowpower mode set to %i\n", led_lowpower);
 
@@ -584,7 +591,9 @@ static ssize_t store_max77843_rgb_brightness(struct device *dev,
 					const char *buf, size_t count)
 {
 	int ret;
+	#ifdef CONFIG_LEDS_MAX77843_RGB_CONTROL
     u8 max_brightness;
+	#endif
 	u8 brightness;
 
 	pr_info("leds-max77843-rgb: %s\n", __func__);
@@ -597,8 +606,13 @@ static ssize_t store_max77843_rgb_brightness(struct device *dev,
 
 	led_lowpower_mode = 0;
 
+	#ifdef CONFIG_LEDS_MAX77843_RGB_CONTROL
     max_brightness = (led_lowpower_mode) ? leds_control.current_low : leds_control.current_high;
     brightness = (brightness * max_brightness) / LED_MAX_CURRENT;
+	#else
+    if (brightness > LED_MAX_CURRENT)
+    brightness = LED_MAX_CURRENT;
+	#endif
 
 	led_dynamic_current = brightness;
 
@@ -641,32 +655,51 @@ static ssize_t store_max77843_rgb_pattern(struct device *dev,
 		break;
 	}
 	case CHARGING_ERR:
+	#ifdef CONFIG_LEDS_MAX77843_RGB_CONTROL
 	if (leds_control.noti_ramp_control == 1)
 		max77843_rgb_ramp(dev, leds_control.noti_ramp_up, leds_control.noti_ramp_down);
+	#endif
 		max77843_rgb_blink(dev, 500, 500);
 		max77843_rgb_set_state(&max77843_rgb->led[RED], led_dynamic_current, LED_BLINK);
 		break;
 	case MISSED_NOTI:
+	#ifdef CONFIG_LEDS_MAX77843_RGB_CONTROL
 	if (leds_control.noti_ramp_control == 1)
 		max77843_rgb_ramp(dev, leds_control.noti_ramp_up, leds_control.noti_ramp_down);
 		max77843_rgb_blink(dev, leds_control.noti_delay_on, leds_control.noti_delay_off);
 		max77843_rgb_set_state(&max77843_rgb->led[BLUE], led_dynamic_current, LED_BLINK);
+	#else
+	max77843_rgb_blink(dev, 500, 5000);
+	max77843_rgb_set_state(&max77843_rgb->led[BLUE], led_dynamic_current, LED_BLINK);
+	#endif
 		break;
 	case LOW_BATTERY:
+	#ifdef CONFIG_LEDS_MAX77843_RGB_CONTROL
 	if (leds_control.noti_ramp_control == 1)
 		max77843_rgb_ramp(dev, leds_control.noti_ramp_up, leds_control.noti_ramp_down);
 		max77843_rgb_blink(dev, leds_control.noti_delay_on, leds_control.noti_delay_off);
 		max77843_rgb_set_state(&max77843_rgb->led[RED], led_dynamic_current, LED_BLINK);
+	#else
+		max77843_rgb_blink(dev, 500, 5000);
+		max77843_rgb_set_state(&max77843_rgb->led[RED], led_dynamic_current, LED_BLINK);
+	#endif
 		break;
 	case FULLY_CHARGED:
 		max77843_rgb_set_state(&max77843_rgb->led[GREEN], led_dynamic_current, LED_ALWAYS_ON);
 		break;
 	case POWERING:
+	#ifdef CONFIG_LEDS_MAX77843_RGB_CONTROL
 	if (leds_control.noti_ramp_control == 1)
 		max77843_rgb_ramp(dev, leds_control.noti_ramp_up, leds_control.noti_ramp_down);
 		max77843_rgb_blink(dev, leds_control.noti_delay_on, leds_control.noti_delay_off);
 		max77843_rgb_set_state(&max77843_rgb->led[BLUE], led_dynamic_current, LED_ALWAYS_ON);
 		max77843_rgb_set_state(&max77843_rgb->led[GREEN], led_dynamic_current, LED_BLINK);
+	#else
+		max77843_rgb_ramp(dev, 800, 800);
+		max77843_rgb_blink(dev, 200, 200);
+		max77843_rgb_set_state(&max77843_rgb->led[BLUE], led_dynamic_current, LED_ALWAYS_ON);
+		max77843_rgb_set_state(&max77843_rgb->led[GREEN], led_dynamic_current, LED_BLINK);
+	#endif
 		break;
 	default:
 		break;
@@ -790,10 +823,11 @@ static ssize_t store_max77843_rgb_blink(struct device *dev,
 	if (led_b_brightness) {
 		max77843_rgb_set_state(&max77843_rgb->led[BLUE], led_b_brightness, LED_BLINK);
 	}
+	#ifdef CONFIG_LEDS_MAX77843_RGB_CONTROL
 	/*Set LED blink mode*/
 		if (leds_control.noti_ramp_control == 1)
 	max77843_rgb_ramp(dev, leds_control.noti_ramp_up, leds_control.noti_ramp_down);
-	
+		#endif
 	max77843_rgb_blink(dev, delay_on_time, delay_off_time);
 	
 	pr_info("leds-max77843-rgb: %s, delay_on_time= %x, delay_off_time= %x\n", __func__, delay_on_time, delay_off_time);
@@ -960,6 +994,7 @@ static DEVICE_ATTR(delay_off, 0640, led_delay_off_show, led_delay_off_store);
 static DEVICE_ATTR(blink, 0640, NULL, led_blink_store);
 
 #ifdef SEC_LED_SPECIFIC
+#ifdef CONFIG_LEDS_MAX77843_RGB_CONTROL
 static ssize_t show_leds_property(struct device *dev,
                                   struct device_attribute *attr, char *buf);
 
@@ -1065,6 +1100,7 @@ static ssize_t store_leds_property(struct device *dev,
     
     return len;
 }
+#endif
 /* below nodes is SAMSUNG specific nodes */
 static DEVICE_ATTR(led_r, 0660, NULL, store_led_r);
 static DEVICE_ATTR(led_g, 0660, NULL, store_led_g);
@@ -1179,9 +1215,11 @@ static int max77843_rgb_probe(struct platform_device *pdev)
 		goto device_create_err;
 	}
 
+	#ifdef CONFIG_LEDS_MAX77843_RGB_CONTROL
     for(i = 0; i < ARRAY_SIZE(leds_control_attrs); i++) {
         ret = sysfs_create_file(&led_dev->kobj, &leds_control_attrs[i].attr);
     }
+	#endif
 
 	platform_set_drvdata(pdev, max77843_rgb);
 #if defined(CONFIG_LEDS_USE_ED28) && defined(CONFIG_SEC_FACTORY)

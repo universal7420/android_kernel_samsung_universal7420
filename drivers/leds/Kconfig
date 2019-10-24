@@ -506,7 +506,14 @@ config LEDS_MAX77833_RGB_CONTROL
 	depends on LEDS_MAX77833_RGB
 	help
 	If you say yes here you will get support for
-	for the MAX77833 RGB led chip sysfs control.
+	the MAX77833 RGB led chip sysfs control.
+
+config LEDS_MAX77843_RGB_CONTROL
+	tristate "Led max77843 rgb control"
+	depends on LEDS_MAX77843_RGB
+	help
+	  If you say yes here you will get support for
+	  for the MAX77843 RGB led chip sysfs control.
 
 config LEDS_S2MPB02
 	bool "LED support for the S2MPB02"
