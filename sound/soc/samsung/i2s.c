@@ -46,6 +46,8 @@
 
 #define msecs_to_loops(t) (loops_per_jiffy / 1000 * HZ * t)
 
+#define I2S_DEFAULT_SLOT_NUM	2 /* stereo default */
+
 enum samsung_dai_type {
 	TYPE_PRI,
 	TYPE_SEC,
@@ -92,6 +94,7 @@ struct i2s_dai {
 #endif
 #define DAI_OPENED	(1 << 0) /* Dai is opened */
 #define DAI_MANAGER	(1 << 1) /* Dai is the manager */
+#define DAI_TDM_MODE	(1 << 2) /* Dai is set as TDM mode */
 	unsigned mode;
 	/* Driver for this DAI */
 	struct snd_soc_dai_driver i2s_dai_drv;
@@ -127,6 +130,7 @@ struct i2s_dai {
 	u32	rfs_msk;
 	u32	bfs_sht;
 	u32	bfs_msk;
+	int	slotnum;
 };
 
 /* Lock for cross i/f checks */
@@ -622,6 +626,7 @@ static int i2s_set_fmt(struct snd_soc_dai *dai,
 		tmp |= (MOD_SDF_LSB << i2s->sdf_sht);
 		break;
 	case SND_SOC_DAIFMT_I2S:
+	case SND_SOC_DAIFMT_DSP_A: /* both are same in exynos */
 		tmp |= (MOD_SDF_IIS << i2s->sdf_sht);
 		break;
 	default:
@@ -676,6 +681,41 @@ static int i2s_set_fmt(struct snd_soc_dai *dai,
 
 	return 0;
 }
+
+#ifdef CONFIG_SND_SOC_I2S_1840_TDM
+static int i2s_set_tdm_slot(struct snd_soc_dai *dai,
+	unsigned int tx_mask, unsigned int rx_mask, int slots, int slot_width)
+{
+	struct i2s_dai *i2s = to_info(dai);
+	u32 tdm;
+
+	if (!(i2s->quirks & QUIRK_SUPPORTS_TDM)) {
+		dev_err(&i2s->pdev->dev, "TDM not supported\n");
+		return -EINVAL;
+	}
+
+	tdm = readl(i2s->addr + I2STDM);
+	tdm &= ~(TDM_TX_SLOTS_MASK << TDM_TX_SLOTS_SHIFT);
+	tdm &= ~(TDM_RX_SLOTS_MASK << TDM_RX_SLOTS_SHIFT);
+	if (slots) {
+		i2s->mode |= DAI_TDM_MODE;
+		tdm |= TDM_ENABLE;
+		tdm |= ((CONFIG_SND_SOC_I2S_TXSLOT_NUMBER-1) & TDM_TX_SLOTS_MASK)
+			<< TDM_TX_SLOTS_SHIFT;
+		tdm |= ((CONFIG_SND_SOC_I2S_RXSLOT_NUMBER-1) & TDM_RX_SLOTS_MASK)
+			<< TDM_RX_SLOTS_SHIFT;
+		pr_info("tdm mode transmission - tx: %d, rx: %d where txmask: 0x%08X, rxmask: 0x%08X\n",
+			CONFIG_SND_SOC_I2S_TXSLOT_NUMBER, CONFIG_SND_SOC_I2S_RXSLOT_NUMBER,
+			tx_mask, rx_mask);
+	} else {
+		i2s->mode &= ~DAI_TDM_MODE;
+		tdm &= ~TDM_ENABLE;
+	}
+	writel(tdm, i2s->addr + I2STDM);
+
+	return 0;
+}
+#endif
 
 static int i2s_hw_params(struct snd_pcm_substream *substream,
 	struct snd_pcm_hw_params *params, struct snd_soc_dai *dai)
@@ -870,6 +910,9 @@ static int i2s_startup(struct snd_pcm_substream *substream,
 	else
 		i2s->mode |= DAI_MANAGER;
 
+	if (is_opened(other))
+		i2s->mode |= other->mode & DAI_TDM_MODE;
+
 	/* Enforce set_sysclk in Master mode */
 	i2s->rclk_srcrate = 0;
 
@@ -912,9 +955,12 @@ static void i2s_shutdown(struct snd_pcm_substream *substream,
 
 	i2s->mode &= ~DAI_OPENED;
 	i2s->mode &= ~DAI_MANAGER;
+	i2s->mode &= ~DAI_TDM_MODE;
 
-	if (is_opened(other))
+	if (is_opened(other)) {
 		other->mode |= DAI_MANAGER;
+		i2s->mode |= other->mode & DAI_TDM_MODE;
+	}
 
 	/* Reset any constraint on RFS and BFS */
 	i2s->rfs = 0;
@@ -957,7 +1003,7 @@ static int config_setup(struct i2s_dai *i2s)
 
 	/* Select least possible multiple(2) if no constraint set */
 	if (!bfs)
-		bfs = blc * 2;
+		bfs = blc * i2s->slotnum;
 
 	rfs = i2s->rfs;
 
@@ -971,6 +1017,7 @@ static int config_setup(struct i2s_dai *i2s)
 			rfs = 384;
 		else
 			rfs = 512;
+		rfs /= (i2s->slotnum / I2S_DEFAULT_SLOT_NUM);
 	}
 
 	if ((rfs % bfs) || (rfs > 768)) {
@@ -1441,6 +1488,9 @@ static const struct snd_soc_dai_ops samsung_i2s_dai_ops = {
 	.set_fmt = i2s_set_fmt,
 	.set_clkdiv = i2s_set_clkdiv,
 	.set_sysclk = i2s_set_sysclk,
+#ifdef CONFIG_SND_SOC_I2S_1840_TDM
+	.set_tdm_slot = i2s_set_tdm_slot,
+#endif
 	.startup = i2s_startup,
 	.shutdown = i2s_shutdown,
 	.delay = i2s_delay,
@@ -1477,13 +1527,13 @@ static struct i2s_dai *i2s_alloc_dai(struct platform_device *pdev,
 	i2s->i2s_dai_drv.suspend = i2s_suspend;
 	i2s->i2s_dai_drv.resume = i2s_resume;
 	i2s->i2s_dai_drv.playback.channels_min = 2;
-	i2s->i2s_dai_drv.playback.channels_max = 2;
+	i2s->i2s_dai_drv.playback.channels_max = CONFIG_SND_SOC_I2S_TXSLOT_NUMBER;
 	i2s->i2s_dai_drv.playback.rates = SAMSUNG_I2S_RATES;
 	i2s->i2s_dai_drv.playback.formats = SAMSUNG_I2S_FMTS;
 
 	if (type == TYPE_PRI) {
 		i2s->i2s_dai_drv.capture.channels_min = 1;
-		i2s->i2s_dai_drv.capture.channels_max = 2;
+		i2s->i2s_dai_drv.capture.channels_max = CONFIG_SND_SOC_I2S_RXSLOT_NUMBER;
 		i2s->i2s_dai_drv.capture.rates = SAMSUNG_I2S_RATES;
 		i2s->i2s_dai_drv.capture.formats = SAMSUNG_I2S_FMTS;
 		dev_set_drvdata(&i2s->pdev->dev, i2s);
@@ -1618,6 +1668,7 @@ static int samsung_i2s_probe(struct platform_device *pdev)
 	struct resource *res;
 	u32 regs_base, quirks = 0;
 	u32 amixer = 0;
+	int slotnum = I2S_DEFAULT_SLOT_NUM;
 #ifdef CONFIG_SND_SAMSUNG_IDMA
 	u32 idma_addr;
 #endif
@@ -1705,8 +1756,12 @@ static int samsung_i2s_probe(struct platform_device *pdev)
 		if (of_find_property(np, "samsung,supports-rstclr", NULL))
 			quirks |= QUIRK_NEED_RSTCLR;
 
-		if (of_find_property(np, "samsung,supports-tdm", NULL))
+		if (of_find_property(np, "samsung,supports-tdm", NULL)) {
 			quirks |= QUIRK_SUPPORTS_TDM;
+			of_property_read_u32(np, "samsung,tdm-slotnum", &slotnum);
+			dev_info(&pdev->dev, "TDM mode was applied : %d\n",
+				slotnum);
+		}
 
 		if (of_find_property(np, "samsung,supports-low-rfs", NULL))
 			quirks |= QUIRK_SUPPORTS_LOW_RFS;
@@ -1770,6 +1825,7 @@ static int samsung_i2s_probe(struct platform_device *pdev)
 	pri_dai->base = regs_base;
 	pri_dai->quirks = quirks;
 	pri_dai->amixer = amixer;
+	pri_dai->slotnum = slotnum;
 
 	if (quirks & QUIRK_PRI_6CHAN)
 		pri_dai->i2s_dai_drv.playback.channels_max = 6;
@@ -1797,6 +1853,7 @@ static int samsung_i2s_probe(struct platform_device *pdev)
 				sec_dai->dma_playback.channel = res->start;
 		}
 
+		sec_dai->slotnum = pri_dai->slotnum;
 		sec_dai->dma_playback.dma_size = 4;
 		sec_dai->base = regs_base;
 		sec_dai->quirks = quirks;

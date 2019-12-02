@@ -649,7 +649,7 @@ static int esa_fw_startup(void)
 	esa_fw_download();
 
 	/* wait for fw ready */
-	ret = wait_event_interruptible_timeout(esa_wq, si.fw_ready, HZ / 2);
+	ret = wait_event_interruptible_timeout(esa_wq, si.fw_ready, HZ * 3);
 	if (!ret) {
 		esa_err("%s: fw not ready!!!\n", __func__);
 		si.fw_use_dram = false;

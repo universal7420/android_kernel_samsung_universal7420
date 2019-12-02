@@ -1591,16 +1591,29 @@ static int snd_pcm_drop(struct snd_pcm_substream *substream)
 }
 
 
-static bool is_pcm_file(struct file *file)
+/* WARNING: Don't forget to fput back the file */
+static struct file *snd_pcm_file_fd(int fd, int *fput_needed)
 {
-	struct inode *inode = file_inode(file);
+	struct file *file;
+	struct inode *inode;
 	unsigned int minor;
 
-	if (!S_ISCHR(inode->i_mode) || imajor(inode) != snd_major)
-		return false;
+	file = fget_light(fd, fput_needed);
+	if (!file)
+		return NULL;
+	inode = file_inode(file);
+	if (!S_ISCHR(inode->i_mode) ||
+	    imajor(inode) != snd_major) {
+		fput_light(file, *fput_needed);
+		return NULL;
+	}
 	minor = iminor(inode);
-	return snd_lookup_minor_data(minor, SNDRV_DEVICE_TYPE_PCM_PLAYBACK) ||
-		snd_lookup_minor_data(minor, SNDRV_DEVICE_TYPE_PCM_CAPTURE);
+	if (!snd_lookup_minor_data(minor, SNDRV_DEVICE_TYPE_PCM_PLAYBACK) &&
+	    !snd_lookup_minor_data(minor, SNDRV_DEVICE_TYPE_PCM_CAPTURE)) {
+		fput_light(file, *fput_needed);
+		return NULL;
+	}
+	return file;
 }
 
 /*
@@ -1609,18 +1622,16 @@ static bool is_pcm_file(struct file *file)
 static int snd_pcm_link(struct snd_pcm_substream *substream, int fd)
 {
 	int res = 0;
+	struct file *file;
 	struct snd_pcm_file *pcm_file;
 	struct snd_pcm_substream *substream1;
 	struct snd_pcm_group *group;
-	struct fd f = fdget(fd);
+	int fput_needed;
 
-	if (!f.file)
+	file = snd_pcm_file_fd(fd, &fput_needed);
+	if (!file)
 		return -EBADFD;
-	if (!is_pcm_file(f.file)) {
-		res = -EBADFD;
-		goto _badf;
-	}
-	pcm_file = f.file->private_data;
+	pcm_file = file->private_data;
 	substream1 = pcm_file->substream;
 	group = kmalloc(sizeof(*group), GFP_KERNEL);
 	if (!group) {
@@ -1654,9 +1665,8 @@ static int snd_pcm_link(struct snd_pcm_substream *substream, int fd)
 	up_write(&snd_pcm_link_rwsem);
  _nolock:
 	snd_card_unref(substream1->pcm->card);
+	fput_light(file, fput_needed);
 	kfree(group);
- _badf:
-	fdput(f);
 	return res;
 }
 

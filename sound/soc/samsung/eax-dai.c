@@ -236,6 +236,25 @@ static int eax_dai_trigger(struct snd_pcm_substream *substream,
 	return ret;
 }
 
+#ifdef CONFIG_SND_SOC_I2S_1840_TDM
+static int eax_dai_set_tdm_slot(struct snd_soc_dai *dai,
+	unsigned int tx_mask, unsigned int rx_mask, int slots, int slot_width)
+{
+	if (!ei.master)
+		return -ENODEV;
+
+	spin_lock(&ei.lock);
+	if (eax_dai_any_tx_running()) {
+		spin_unlock(&ei.lock);
+		return 0;
+	}
+	spin_unlock(&ei.lock);
+
+	return (*ei.master_dai_ops->set_tdm_slot)(dai,
+		tx_mask, rx_mask, slots, slot_width);
+}
+#endif
+
 static int eax_dai_hw_params(struct snd_pcm_substream *substream,
 	struct snd_pcm_hw_params *params, struct snd_soc_dai *dai)
 {
@@ -379,6 +398,9 @@ static const struct snd_soc_dai_ops eax_dai_ops = {
 	.set_fmt	= eax_dai_set_fmt,
 	.set_clkdiv	= eax_dai_set_clkdiv,
 	.set_sysclk	= eax_dai_set_sysclk,
+#ifdef CONFIG_SND_SOC_I2S_1840_TDM
+	.set_tdm_slot	= eax_dai_set_tdm_slot,
+#endif
 	.startup	= eax_dai_startup,
 	.shutdown	= eax_dai_shutdown,
 };

@@ -550,6 +550,7 @@ static void snd_card_set_id_no_lock(struct snd_card *card, const char *src,
 				    const char *nid)
 {
 	int len, loops;
+	bool with_suffix;
 	bool is_default = false;
 	char *id;
 	
@@ -565,23 +566,26 @@ static void snd_card_set_id_no_lock(struct snd_card *card, const char *src,
 		is_default = true;
 	}
 
-	len = strlen(id);
+	with_suffix = false;
 	for (loops = 0; loops < SNDRV_CARDS; loops++) {
-		char *spos;
-		char sfxstr[5]; /* "_012" */
-		int sfxlen;
-
 		if (card_id_ok(card, id))
 			return; /* OK */
 
-		/* Add _XYZ suffix */
-		sprintf(sfxstr, "_%X", loops + 1);
-		sfxlen = strlen(sfxstr);
-		if (len + sfxlen >= sizeof(card->id))
-			spos = id + sizeof(card->id) - sfxlen - 1;
-		else
-			spos = id + len;
-		strcpy(spos, sfxstr);
+		len = strlen(id);
+		if (!with_suffix) {
+			/* add the "_X" suffix */
+			char *spos = id + len;
+			if (len >  sizeof(card->id) - 3)
+				spos = id + sizeof(card->id) - 3;
+			strcpy(spos, "_1");
+			with_suffix = true;
+		} else {
+			/* modify the existing suffix */
+			if (id[len - 1] != '9')
+				id[len - 1]++;
+			else
+				id[len - 1] = 'A';
+		}
 	}
 	/* fallback to the default id */
 	if (!is_default) {

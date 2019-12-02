@@ -439,6 +439,31 @@ config SND_SOC_SAMSUNG_ZERO_HDMI
 	help
 		Say Y if you want to add support for HDMI on the Zero.
 
+config SND_SOC_I2S_TXSLOT_NUMBER
+	int "Number of tx slots including audio sample"
+	depends on SND_SAMSUNG_I2S && SND_SAMSUNG_AUDSS
+	default 2
+	help
+	  An audio sample is included in a slot in the I2S. Thus, slot number will be 2
+	  in the stereo audio transmission, so it's default number. In the TDM mode,
+	  you have to change number of slot for transmitting more slots.
+
+config SND_SOC_I2S_RXSLOT_NUMBER
+	int "Number of rx slots including audio sample"
+	depends on SND_SAMSUNG_I2S && SND_SAMSUNG_AUDSS
+	default 2
+	help
+	  An audio sample is included in a slot in the I2S. Thus, slot number will be 2
+	  in the stereo audio transmission, so it's default number. In the TDM mode,
+	  you have to change number of slot for receiving more slots.
+
+config SND_SOC_I2S_1840_TDM
+	bool "Enable TDM mode on Universal7890"
+	depends on SND_SAMSUNG_AUDSS && SND_SOC_SAMSUNG_ZERO_CLEARWATER
+	default n
+	help
+	  Say Y if you want to add support for I2S TDM on the Universal7890
+
 config SND_SOC_ES515_I2S_MASTER
 	bool "Enable Codec master mode for eS515 on XYREF"
 	depends on SND_SAMSUNG_XYREF && SND_SOC_ES515
