@@ -120,8 +120,7 @@ static u8 led_lowpower_mode = 0x0;
 
 unsigned int octa_color = 0x0;
 
-// Enable Fading by default
-unsigned int led_enable_fade = 1;
+unsigned int  led_enable_fade = 0;
 unsigned int led_fade_time_up = 800;
 unsigned int led_fade_time_down = 800;
 unsigned int led_always_disable = 0;
@@ -600,7 +599,7 @@ static bool check_restrictions(void)
 	struct tm tmv;
 	int curhour;
 	bool ret = true;
-
+	
 	if (led_always_disable)
 	{
 		ret = false;
@@ -611,14 +610,14 @@ static bool check_restrictions(void)
 	{
 		do_gettimeofday(&curtime);
 		time_to_tm(curtime.tv_sec, 0, &tmv);
-
+	
 		curhour = tmv.tm_hour + ((sys_tz.tz_minuteswest / 60) * -1);
 		if (curhour < 0)
 			curhour = 24 + curhour;
 		if (curhour > 23)
 			curhour = curhour - 24;
-
-		if (led_debug_enable) pr_alert("CHECK LED TIME RESTRICTION: %d:%d:%d:%ld -- %d -- %d -- %d\n", tmv.tm_hour, tmv.tm_min,
+	
+		if (led_debug_enable) pr_alert("CHECK LED TIME RESTRICTION: %d:%d:%d:%ld -- %d -- %d -- %d\n", tmv.tm_hour, tmv.tm_min, 
 				         tmv.tm_sec, curtime.tv_usec, sys_tz.tz_minuteswest, sys_tz.tz_dsttime, curhour);
 		if (led_block_leds_time_start > led_block_leds_time_stop)
 		{
@@ -653,7 +652,7 @@ static ssize_t store_max77843_rgb_pattern(struct device *dev,
 		return count;
 	}
 	GBLdev = dev;
-
+	
 	/* Set all LEDs Off */
 	max77843_rgb_reset(dev);
 	if (mode == PATTERN_OFF)
@@ -662,7 +661,7 @@ static ssize_t store_max77843_rgb_pattern(struct device *dev,
 
 	if (!check_restrictions())
 		return count;
-
+		
 	/* Set to low power consumption mode */
 	if (led_lowpower_mode == 1)
 		led_dynamic_current = low_powermode_current;
@@ -1007,7 +1006,7 @@ static ssize_t led_fade_store(struct device *dev,
 	retval = sscanf(buf, "%d", &enabled);
 	if (retval != 0 && (enabled == 0 || enabled == 1))
 		led_enable_fade = enabled;
-
+		
 	printk(KERN_DEBUG "led_fade is called\n");
 
 	return count;
@@ -1032,7 +1031,7 @@ static ssize_t led_debug_enable_store(struct device *dev,
 	retval = sscanf(buf, "%d", &enabled);
 	if (retval != 0 && (enabled == 0 || enabled == 1))
 		led_debug_enable = enabled;
-
+		
 	printk(KERN_DEBUG "led_debug_enable is called\n");
 
 	return count;
