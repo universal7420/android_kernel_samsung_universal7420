@@ -53,15 +53,6 @@ enum HBM {
 	HBM_MAX
 };
 
-enum COLOR_OFFSET_FUNC {
-	COLOR_OFFSET_FUNC_NONE,
-	COLOR_OFFSET_FUNC_F1,
-	COLOR_OFFSET_FUNC_F2,
-	COLOR_OFFSET_FUNC_F3,
-	COLOR_OFFSET_FUNC_F4,
-	COLOR_OFFSET_FUNC_MAX
-};
-
 enum hmt_mode {
 	HMT_MDNIE_OFF,
 	HMT_MDNIE_ON,
@@ -92,10 +83,10 @@ struct mdnie_table {
 
 struct mdnie_scr_info {
 	u32 index;
-	u32 cr;
-	u32 wr;
-	u32 wg;
-	u32 wb;
+	u32 color_blind;	/* Cyan Red */
+	u32 white_r;
+	u32 white_g;
+	u32 white_b;
 };
 
 struct mdnie_trans_info {
@@ -105,8 +96,8 @@ struct mdnie_trans_info {
 };
 
 struct mdnie_night_info {
-	u32 max_w;
-	u32 max_h;
+	u32 index_max_num;
+	u32 index_size;
 };
 
 struct mdnie_tune {
@@ -122,16 +113,10 @@ struct mdnie_tune {
 	struct mdnie_trans_info	*trans_info;
 	struct mdnie_night_info	*night_info;
 	unsigned char **coordinate_table;
-	unsigned char **adjust_ldu_table;
+	unsigned char **adjust_ldu_rgb_table;
 	unsigned char *night_mode_table;
 	int (*get_hbm_index)(int);
 	int (*color_offset[])(int, int);
-};
-
-struct rgb_info {
-	int r;
-	int g;
-	int b;
 };
 
 struct mdnie_ops {
@@ -165,7 +150,6 @@ struct mdnie_info {
 	unsigned int		tuning;
 	unsigned int		accessibility;
 	unsigned int		color_correction;
-	unsigned int		coordinate[2];
 
 	char			path[50];
 
@@ -175,18 +159,24 @@ struct mdnie_info {
 
 	struct notifier_block	fb_notif;
 
-	struct rgb_info		wrgb_current;
-
+	unsigned int white_r;
+	unsigned int white_g;
+	unsigned int white_b;
 	unsigned int disable_trans_dimming;
 	unsigned int night_mode_level;
 
 	struct mdnie_table table_buffer;
 	mdnie_t sequence_buffer[256];
+	u16 coordinate[2];
 #if defined(CONFIG_EXYNOS_DECON_MDNIE)
 	mdnie_t *lpd_store_data;
 	unsigned int need_update;
 #endif
+
 };
+
+extern int mdnie_calibration(int *r);
+extern int mdnie_open_file(const char *path, char **fp);
 
 #if defined(CONFIG_EXYNOS_DECON_MDNIE)
 extern struct mdnie_info* decon_mdnie_register(void);
@@ -201,6 +191,7 @@ extern int mdnie_register(struct device *p, void *data, mdnie_w w, mdnie_r r, un
 #if defined(CONFIG_EXYNOS_DECON_DUAL_DISPLAY) && defined(CONFIG_EXYNOS_DECON_MDNIE_LITE)
 extern int mdnie2_register(struct device *p, void *data, mdnie_w w, mdnie_r r);
 #endif
+extern uintptr_t mdnie_request_table(char *path, struct mdnie_table *s);
 extern ssize_t attr_store_for_each(struct class *cls, const char *name, const char *buf, size_t size);
 extern struct class *get_mdnie_class(void);
 

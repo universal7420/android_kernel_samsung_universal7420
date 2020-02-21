@@ -261,7 +261,7 @@ static void dsim_panel_set_elvss(struct dsim_device *dsim)
 	if(br_nit > S6E3FA3_MAX_BRIGHTNESS && br_nit < S6E3FA3_HBM_BRIGHTNESS) {
 		ELVSS[S6E3FA3_ELVSS_LEN - 1] = dsim->priv.hbm_elvss;
 	}
-	else if(S6E3FA3_IS_8MASK(panel->id[0]) && br_nit <= 15) {
+	else if(br_nit <= 15) {
 		ELVSS[S6E3FA3_ELVSS_LEN - 1] = 0x0D;
 	}
 
@@ -390,7 +390,7 @@ exit:
 
 static int low_level_set_brightness(struct dsim_device *dsim ,int force)
 {
-	struct panel_private *panel = &dsim->priv;
+
 	if (dsim_write_hl_data(dsim, SEQ_TEST_KEY_ON_F0, ARRAY_SIZE(SEQ_TEST_KEY_ON_F0)) < 0)
 		dsim_err("%s : fail to write F0 on command.\n", __func__);
 	if (dsim_write_hl_data(dsim, SEQ_TEST_KEY_ON_FC, ARRAY_SIZE(SEQ_TEST_KEY_ON_FC)) < 0)
@@ -406,8 +406,7 @@ static int low_level_set_brightness(struct dsim_device *dsim ,int force)
 
 	dsim_panel_set_elvss(dsim);
 
-	if (S6E3FA3_IS_8MASK(panel->id[0])) //8mask
-		dsim_panel_set_vint(dsim, force);
+	dsim_panel_set_vint(dsim, force);
 
 	if (dsim_write_hl_data(dsim, SEQ_GAMMA_UPDATE, ARRAY_SIZE(SEQ_GAMMA_UPDATE)) < 0)
 		dsim_err("%s : failed to write gamma \n", __func__);
@@ -435,7 +434,7 @@ static int get_panel_acl_on(int br, int adaptive_control)
 {
 	int retVal = ACL_STATUS_ON;
 
-	if (br == UI_MAX_BRIGHTNESS && adaptive_control == 0)
+	if (br == S6E3FA3_MAX_BRIGHTNESS && adaptive_control == 0)
 		retVal = ACL_STATUS_OFF;
 
 	return retVal;
@@ -476,7 +475,7 @@ int dsim_panel_set_brightness(struct dsim_device *dsim, int force)
 	acutal_br = panel->br_tbl[p_br];
 	panel->br_index = get_acutal_br_index(dsim, acutal_br);
 	real_br = get_actual_br_value(dsim, panel->br_index);
-	panel->acl_enable = get_panel_acl_on(p_br, panel->adaptive_control);
+	panel->acl_enable = get_panel_acl_on(real_br, panel->adaptive_control);
 
 	if (panel->state != PANEL_STATE_RESUMED) {
 		dsim_info("%s : panel is not active state..\n", __func__);

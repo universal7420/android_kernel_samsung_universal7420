@@ -123,26 +123,6 @@ void vpp_op_timer_handler(unsigned long arg)
 	dev_info(DEV, "VPP[%d] irq hasn't been occured", vpp->id);
 }
 
-static void decon_dump_for_vpp(struct decon_device *decon)
-{
-	dev_err(decon->dev, "=== DECON%d SFR DUMP ===\n", decon->id);
-
-	if (decon->state != DECON_STATE_ON)
-		return;
-
-	print_hex_dump(KERN_ERR, "", DUMP_PREFIX_ADDRESS, 32, 4,
-			decon->regs, 0x718, false);
-	dev_err(decon->dev, "=== DECON%d MIC SFR DUMP ===\n", decon->id);
-
-	print_hex_dump(KERN_ERR, "", DUMP_PREFIX_ADDRESS, 32, 4,
-			decon->regs + 0x2400, 0x20, false);
-	dev_err(decon->dev, "=== DECON%d SHADOW SFR DUMP ===\n", decon->id);
-
-	print_hex_dump(KERN_ERR, "", DUMP_PREFIX_ADDRESS, 32, 4,
-			decon->regs + SHADOW_OFFSET, 0x718, false);
-}
-
-
 static int vpp_wait_for_update(struct vpp_dev *vpp)
 {
 	int update_cnt;
@@ -156,10 +136,6 @@ static int vpp_wait_for_update(struct vpp_dev *vpp)
 		if (ret == 0) {
 			dev_err(DEV, "timeout of shadow update(%d, %d)\n",
 				update_cnt, vpp->update_cnt);
-				
-			decon_dump_for_vpp(get_decon_drvdata(0));
-			decon_dump_for_vpp(get_decon_drvdata(1));
-			vpp_dump_registers(vpp);
 			return -ETIMEDOUT;
 		}
 		DISP_SS_EVENT_LOG(DISP_EVT_VPP_UPDATE_DONE, vpp->sd, ktime_set(0, 0));
@@ -860,8 +836,7 @@ static long vpp_subdev_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg
 		break;
 
 	case VPP_WAIT_IDLE:
-		if (test_bit(VPP_RUNNING, &vpp->state))
-			vpp_hw_wait_idle(vpp);
+		vpp_hw_wait_idle(vpp);
 		break;
 
 	default:

@@ -43,8 +43,6 @@
 #define S6E3FA3_ACL_OPR_LEN	ARRAY_SIZE(SEQ_OPR_ACL_ON)
 #define S6E3FA3_ACL_OPR_IDX_START	2
 #define S6E3FA3_ACL_OPR_IDX_RATIO	4
-#define S6E3FA3_IS_8MASK(id)	(((id >> 4) & 0x03) == 0x00)
-#define S6E3FA3_IS_7MASK(id)	(((id >> 4) & 0x03) == 0x01)
 
 #ifdef CONFIG_CHECK_OCTA_CHIP_ID
 #define S6E3FA3_OCTAID_REG	0xC9
@@ -134,11 +132,6 @@ static const unsigned char SEQ_AVC_SETTING_2[] = {
 	0x94
 };
 
-static const unsigned char SEQ_AVC_SETTING_2_7MASK[] = {
-	0xFD,
-	0xA8
-};
-
 static const unsigned char SEQ_TSHL_SETTING_1[] = {
 	0xB0,
 	0x10
@@ -168,11 +161,6 @@ static const unsigned char SEQ_GAMMA_CONDITION_SET[] = {
 static const unsigned char SEQ_AID_SETTING[] = {
 	0xB2,
 	0x00, 0xC2
-};
-
-static const unsigned char SEQ_AID_SETTING_7MASK[] = {
-	0xB2,
-	0x00, 0x0C
 };
 
 static const unsigned char SEQ_ELVSS_SET[] = {

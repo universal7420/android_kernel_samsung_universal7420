@@ -338,7 +338,7 @@ static int dsim_panel_enteralpm(struct dsim_device *dsim)
 		return 0;
 	}
 
-	if (panel->lcdConnected == PANEL_DISCONNECTED) {
+	if (panel->lcdConnected == PANEL_DISCONNEDTED) {
 		dsim_err("%s : %d : panel was not connected\n", __func__, dsim->id);
 		return ret;
 	}
@@ -377,7 +377,7 @@ static int dsim_panel_exitalpm(struct dsim_device *dsim)
 		return 0;
 	}
 
-	if (panel->lcdConnected == PANEL_DISCONNECTED) {
+	if (panel->lcdConnected == PANEL_DISCONNEDTED) {
 		dsim_err("%s : %d : panel was not connected\n", __func__, dsim->id);
 		return ret;
 	}

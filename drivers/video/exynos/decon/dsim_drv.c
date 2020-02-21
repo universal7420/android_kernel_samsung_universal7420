@@ -390,7 +390,7 @@ int dsim_write_hl_data(struct dsim_device *dsim, const u8 *cmd, u32 cmdSize)
 	int retry;
 	struct panel_private *panel = &dsim->priv;
 
-	if (panel->lcdConnected == PANEL_DISCONNECTED)
+	if (panel->lcdConnected == PANEL_DISCONNEDTED)
 		return cmdSize;
 
 	//mutex_lock(&dsim->rdwr_lock);
@@ -420,7 +420,7 @@ int dsim_read_hl_data(struct dsim_device *dsim, u8 addr, u32 size, u8 *buf)
 	int retry = 5;
 	struct panel_private *panel = &dsim->priv;
 
-	if (panel->lcdConnected == PANEL_DISCONNECTED)
+	if (panel->lcdConnected == PANEL_DISCONNEDTED)
 		return size;
 
 try_read:
@@ -445,7 +445,7 @@ static int dsim_partial_area_command(struct dsim_device *dsim, void *arg)
 	char data_2b[5];
 	int retry;
 
-	if (panel->lcdConnected == PANEL_DISCONNECTED)
+	if (panel->lcdConnected == PANEL_DISCONNEDTED)
 		return 0;
 
 	/* w is right & h is bottom */
@@ -1048,7 +1048,7 @@ static int dsim_set_panel_power(struct dsim_device *dsim, bool on)
 		return 0;
 #endif
 
-	if (panel->lcdConnected == PANEL_DISCONNECTED) {
+	if (panel->lcdConnected == PANEL_DISCONNEDTED) {
 		dsim_err("%s: panel is not connected. panel power off.\n", __func__);
 		on = false;
 	}

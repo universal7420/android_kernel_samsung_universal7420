@@ -155,95 +155,6 @@ struct SmtDimInfo dimming_info[MAX_BR_INFO] = { // add hbm array
 	{ .br = 600,	.refBr = 600, .cGma = gma2p20, .rTbl = rtbl420nit,	.cTbl = ctbl420nit,	.elv = elvss_600nit,	.way = W4},
 };
 
-struct SmtDimInfo dimming_info_7mask[MAX_BR_INFO] = { // add hbm array
-	{ .br = 2,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl2nit_7mask,		.cTbl = ctbl2nit_7mask,		.elv = elvss_2nit_7mask,	.way = W1},
-	{ .br = 3,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl3nit_7mask,		.cTbl = ctbl3nit_7mask,		.elv = elvss_3nit_7mask,	.way = W1},
-	{ .br = 4,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl4nit_7mask,		.cTbl = ctbl4nit_7mask,		.elv = elvss_4nit_7mask,	.way = W1},
-	{ .br = 5,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl5nit_7mask,		.cTbl = ctbl5nit_7mask,		.elv = elvss_5nit_7mask,	.way = W1},
-	{ .br = 6,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl6nit_7mask,		.cTbl = ctbl6nit_7mask,		.elv = elvss_6nit_7mask,	.way = W1},
-	{ .br = 7,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl7nit_7mask,		.cTbl = ctbl7nit_7mask,		.elv = elvss_7nit_7mask,	.way = W1},
-	{ .br = 8,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl8nit_7mask,		.cTbl = ctbl8nit_7mask,		.elv = elvss_8nit_7mask,	.way = W1},
-	{ .br = 9,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl9nit_7mask,		.cTbl = ctbl9nit_7mask,		.elv = elvss_9nit_7mask,	.way = W1},
-	{ .br = 10,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl10nit_7mask,		.cTbl = ctbl10nit_7mask,	.elv = elvss_10nit_7mask,	.way = W1},
-	{ .br = 11,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl11nit_7mask,		.cTbl = ctbl11nit_7mask,	.elv = elvss_11nit_7mask,	.way = W1},
-	{ .br = 12,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl12nit_7mask,		.cTbl = ctbl12nit_7mask,	.elv = elvss_12nit_7mask,	.way = W1},
-	{ .br = 13,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl13nit_7mask,		.cTbl = ctbl13nit_7mask,	.elv = elvss_13nit_7mask,	.way = W1},
-	{ .br = 14,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl14nit_7mask,		.cTbl = ctbl14nit_7mask,	.elv = elvss_14nit_7mask,	.way = W1},
-	{ .br = 15,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl15nit_7mask,		.cTbl = ctbl15nit_7mask,	.elv = elvss_15nit_7mask,	.way = W1},
-	{ .br = 16,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl16nit_7mask,		.cTbl = ctbl16nit_7mask,	.elv = elvss_16nit_7mask,	.way = W1},
-	{ .br = 17,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl17nit_7mask,		.cTbl = ctbl17nit_7mask,	.elv = elvss_17nit_7mask,	.way = W1},
-	{ .br = 19,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl19nit_7mask,		.cTbl = ctbl19nit_7mask,	.elv = elvss_19nit_7mask,	.way = W1},
-	{ .br = 20,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl20nit_7mask,		.cTbl = ctbl20nit_7mask,	.elv = elvss_20nit_7mask,	.way = W1},
-	{ .br = 21,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl21nit_7mask,		.cTbl = ctbl21nit_7mask,	.elv = elvss_21nit_7mask,	.way = W1},
-	{ .br = 22,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl22nit_7mask,		.cTbl = ctbl22nit_7mask,	.elv = elvss_22nit_7mask,	.way = W1},
-	{ .br = 24,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl24nit_7mask,		.cTbl = ctbl24nit_7mask,	.elv = elvss_24nit_7mask,	.way = W1},
-	{ .br = 25,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl25nit_7mask,		.cTbl = ctbl25nit_7mask,	.elv = elvss_25nit_7mask,	.way = W1},
-	{ .br = 27,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl27nit_7mask,		.cTbl = ctbl27nit_7mask,	.elv = elvss_27nit_7mask,	.way = W1},
-	{ .br = 29,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl29nit_7mask,		.cTbl = ctbl29nit_7mask,	.elv = elvss_29nit_7mask,	.way = W1},
-	{ .br = 30,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl30nit_7mask,		.cTbl = ctbl30nit_7mask,	.elv = elvss_30nit_7mask,	.way = W1},
-	{ .br = 32,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl32nit_7mask,		.cTbl = ctbl32nit_7mask,	.elv = elvss_32nit_7mask,	.way = W1},
-	{ .br = 34,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl34nit_7mask,		.cTbl = ctbl34nit_7mask,	.elv = elvss_34nit_7mask,	.way = W1},
-	{ .br = 37,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl37nit_7mask,		.cTbl = ctbl37nit_7mask,	.elv = elvss_37nit_7mask,	.way = W1},
-	{ .br = 39,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl39nit_7mask,		.cTbl = ctbl39nit_7mask,	.elv = elvss_39nit_7mask,	.way = W1},
-	{ .br = 41,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl41nit_7mask,		.cTbl = ctbl41nit_7mask,	.elv = elvss_41nit_7mask,	.way = W1},
-	{ .br = 44,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl44nit_7mask,		.cTbl = ctbl44nit_7mask,	.elv = elvss_44nit_7mask,	.way = W1},
-	{ .br = 47,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl47nit_7mask,		.cTbl = ctbl47nit_7mask,	.elv = elvss_47nit_7mask,	.way = W1},
-	{ .br = 50,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl50nit_7mask,		.cTbl = ctbl50nit_7mask,	.elv = elvss_50nit_7mask,	.way = W1},
-	{ .br = 53,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl53nit_7mask,		.cTbl = ctbl53nit_7mask,	.elv = elvss_53nit_7mask,	.way = W1},
-	{ .br = 56,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl56nit_7mask,		.cTbl = ctbl56nit_7mask,	.elv = elvss_56nit_7mask,	.way = W1},
-	{ .br = 60,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl60nit_7mask,		.cTbl = ctbl60nit_7mask,	.elv = elvss_60nit_7mask,	.way = W1},
-	{ .br = 64,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl64nit_7mask,		.cTbl = ctbl64nit_7mask,	.elv = elvss_64nit_7mask,	.way = W1},
-	{ .br = 68,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl68nit_7mask,		.cTbl = ctbl68nit_7mask,	.elv = elvss_68nit_7mask,	.way = W1},
-	{ .br = 72,	.refBr = 129, .cGma = gma2p15, .rTbl = rtbl72nit_7mask,		.cTbl = ctbl72nit_7mask,	.elv = elvss_72nit_7mask,	.way = W1},
-	{ .br = 77,	.refBr = 133, .cGma = gma2p15, .rTbl = rtbl77nit_7mask,		.cTbl = ctbl77nit_7mask,	.elv = elvss_77nit_7mask,	.way = W1},
-	{ .br = 82,	.refBr = 140, .cGma = gma2p15, .rTbl = rtbl82nit_7mask,		.cTbl = ctbl82nit_7mask,	.elv = elvss_82nit_7mask,	.way = W1},
-	{ .br = 87,	.refBr = 147, .cGma = gma2p15, .rTbl = rtbl87nit_7mask,		.cTbl = ctbl87nit_7mask,	.elv = elvss_87nit_7mask,	.way = W1},
-	{ .br = 93,	.refBr = 155, .cGma = gma2p15, .rTbl = rtbl93nit_7mask,		.cTbl = ctbl93nit_7mask,	.elv = elvss_93nit_7mask,	.way = W1},
-	{ .br = 98,	.refBr = 164, .cGma = gma2p15, .rTbl = rtbl98nit_7mask,		.cTbl = ctbl98nit_7mask,	.elv = elvss_98nit_7mask,	.way = W1},
-	{ .br = 105,	.refBr = 175, .cGma = gma2p15, .rTbl = rtbl105nit_7mask,	.cTbl = ctbl105nit_7mask,	.elv = elvss_105nit_7mask,	.way = W1},
-	{ .br = 111,	.refBr = 183, .cGma = gma2p15, .rTbl = rtbl111nit_7mask,	.cTbl = ctbl111nit_7mask,	.elv = elvss_111nit_7mask,	.way = W1},
-	{ .br = 119,	.refBr = 195, .cGma = gma2p15, .rTbl = rtbl119nit_7mask,	.cTbl = ctbl119nit_7mask,	.elv = elvss_119nit_7mask,	.way = W1},
-	{ .br = 126,	.refBr = 204, .cGma = gma2p15, .rTbl = rtbl126nit_7mask,	.cTbl = ctbl126nit_7mask,	.elv = elvss_126nit_7mask,	.way = W1},
-	{ .br = 134,	.refBr = 217, .cGma = gma2p15, .rTbl = rtbl134nit_7mask,	.cTbl = ctbl134nit_7mask,	.elv = elvss_134nit_7mask,	.way = W1},
-	{ .br = 143,	.refBr = 227, .cGma = gma2p15, .rTbl = rtbl143nit_7mask,	.cTbl = ctbl143nit_7mask,	.elv = elvss_143nit_7mask,	.way = W1},
-	{ .br = 152,	.refBr = 240, .cGma = gma2p15, .rTbl = rtbl152nit_7mask,	.cTbl = ctbl152nit_7mask,	.elv = elvss_152nit_7mask,	.way = W1},
-	{ .br = 162,	.refBr = 255, .cGma = gma2p15, .rTbl = rtbl162nit_7mask,	.cTbl = ctbl162nit_7mask,	.elv = elvss_162nit_7mask,	.way = W1},
-	{ .br = 172,	.refBr = 268, .cGma = gma2p15, .rTbl = rtbl172nit_7mask,	.cTbl = ctbl172nit_7mask,	.elv = elvss_172nit_7mask,	.way = W1},
-	{ .br = 183,	.refBr = 285, .cGma = gma2p15, .rTbl = rtbl183nit_7mask,	.cTbl = ctbl183nit_7mask,	.elv = elvss_183nit_7mask,	.way = W1},
-	{ .br = 195,	.refBr = 285, .cGma = gma2p15, .rTbl = rtbl195nit_7mask,	.cTbl = ctbl195nit_7mask,	.elv = elvss_195nit_7mask,	.way = W1},
-	{ .br = 207,	.refBr = 285, .cGma = gma2p15, .rTbl = rtbl207nit_7mask,	.cTbl = ctbl207nit_7mask,	.elv = elvss_207nit_7mask,	.way = W1},
-	{ .br = 220,	.refBr = 285, .cGma = gma2p15, .rTbl = rtbl220nit_7mask,	.cTbl = ctbl220nit_7mask,	.elv = elvss_220nit_7mask,	.way = W1},
-	{ .br = 234,	.refBr = 285, .cGma = gma2p15, .rTbl = rtbl234nit_7mask,	.cTbl = ctbl234nit_7mask,	.elv = elvss_234nit_7mask,	.way = W1},
-	{ .br = 249,	.refBr = 287, .cGma = gma2p15, .rTbl = rtbl249nit_7mask,	.cTbl = ctbl249nit_7mask,	.elv = elvss_249nit_7mask,	.way = W1},
-	{ .br = 265,	.refBr = 300, .cGma = gma2p15, .rTbl = rtbl265nit_7mask,	.cTbl = ctbl265nit_7mask,	.elv = elvss_265nit_7mask,	.way = W1},
-	{ .br = 282,	.refBr = 320, .cGma = gma2p15, .rTbl = rtbl282nit_7mask,	.cTbl = ctbl282nit_7mask,	.elv = elvss_282nit_7mask,	.way = W1},
-	{ .br = 300,	.refBr = 336, .cGma = gma2p15, .rTbl = rtbl300nit_7mask,	.cTbl = ctbl300nit_7mask,	.elv = elvss_300nit_7mask,	.way = W1},
-	{ .br = 316,	.refBr = 352, .cGma = gma2p15, .rTbl = rtbl316nit_7mask,	.cTbl = ctbl316nit_7mask,	.elv = elvss_316nit_7mask,	.way = W1},
-	{ .br = 333,	.refBr = 370, .cGma = gma2p15, .rTbl = rtbl333nit_7mask,	.cTbl = ctbl333nit_7mask,	.elv = elvss_333nit_7mask,	.way = W1},
-	{ .br = 350,	.refBr = 388, .cGma = gma2p15, .rTbl = rtbl350nit_7mask,	.cTbl = ctbl350nit_7mask,	.elv = elvss_350nit_7mask,	.way = W1},
-	{ .br = 357,	.refBr = 395, .cGma = gma2p15, .rTbl = rtbl357nit_7mask,	.cTbl = ctbl357nit_7mask,	.elv = elvss_357nit_7mask,	.way = W1},
-	{ .br = 365,	.refBr = 402, .cGma = gma2p15, .rTbl = rtbl365nit_7mask,	.cTbl = ctbl365nit_7mask,	.elv = elvss_365nit_7mask,	.way = W1},
-	{ .br = 372,	.refBr = 402, .cGma = gma2p15, .rTbl = rtbl372nit_7mask,	.cTbl = ctbl372nit_7mask,	.elv = elvss_372nit_7mask,	.way = W1},
-	{ .br = 380,	.refBr = 402, .cGma = gma2p15, .rTbl = rtbl380nit_7mask,	.cTbl = ctbl380nit_7mask,	.elv = elvss_380nit_7mask,	.way = W1},
-	{ .br = 387,	.refBr = 402, .cGma = gma2p15, .rTbl = rtbl387nit_7mask,	.cTbl = ctbl387nit_7mask,	.elv = elvss_387nit_7mask,	.way = W1},
-	{ .br = 395,	.refBr = 402, .cGma = gma2p15, .rTbl = rtbl395nit_7mask,	.cTbl = ctbl395nit_7mask,	.elv = elvss_395nit_7mask,	.way = W1},
-	{ .br = 403,	.refBr = 404, .cGma = gma2p15, .rTbl = rtbl403nit_7mask,	.cTbl = ctbl403nit_7mask,	.elv = elvss_403nit_7mask,	.way = W1},
-	{ .br = 412,	.refBr = 413, .cGma = gma2p15, .rTbl = rtbl412nit_7mask,	.cTbl = ctbl412nit_7mask,	.elv = elvss_412nit_7mask,	.way = W1},
-	{ .br = 420,	.refBr = 420, .cGma = gma2p20, .rTbl = rtbl420nit_7mask,	.cTbl = ctbl420nit_7mask,	.elv = elvss_420nit_7mask,	.way = W2},
-/*hbm interpolation */
-	{ .br = 443,	.refBr = 443, .cGma = gma2p20, .rTbl = rtbl420nit_7mask, 	.cTbl = ctbl420nit_7mask,	.elv = elvss_443nit_7mask,	.way = W3},
-	{ .br = 465,	.refBr = 465, .cGma = gma2p20, .rTbl = rtbl420nit_7mask,	.cTbl = ctbl420nit_7mask,	.elv = elvss_465nit_7mask,	.way = W3},
-	{ .br = 488,	.refBr = 488, .cGma = gma2p20, .rTbl = rtbl420nit_7mask,	.cTbl = ctbl420nit_7mask,	.elv = elvss_488nit_7mask,	.way = W3},
-	{ .br = 510,	.refBr = 510, .cGma = gma2p20, .rTbl = rtbl420nit_7mask,	.cTbl = ctbl420nit_7mask,	.elv = elvss_510nit_7mask,	.way = W3},
-	{ .br = 533,	.refBr = 533, .cGma = gma2p20, .rTbl = rtbl420nit_7mask,	.cTbl = ctbl420nit_7mask,	.elv = elvss_533nit_7mask,	.way = W3},
-	{ .br = 555,	.refBr = 555, .cGma = gma2p20, .rTbl = rtbl420nit_7mask,	.cTbl = ctbl420nit_7mask,	.elv = elvss_555nit_7mask,	.way = W3},
-	{ .br = 578,	.refBr = 578, .cGma = gma2p20, .rTbl = rtbl420nit_7mask,	.cTbl = ctbl420nit_7mask,	.elv = elvss_578nit_7mask,	.way = W3},
-/* hbm */
-	{ .br = 600,	.refBr = 600, .cGma = gma2p20, .rTbl = rtbl420nit_7mask,	.cTbl = ctbl420nit_7mask,	.elv = elvss_600nit_7mask,	.way = W4},
-};
-
-
-
 static const unsigned char *HBM_TABLE[HBM_STATUS_MAX] = {SEQ_HBM_OFF, SEQ_HBM_ON};
 static const unsigned char *ACL_TABLE[ACL_STATUS_MAX] = {SEQ_ACL_OFF, SEQ_ACL_ON};
 static const unsigned char *OPR_TABLE[OPR_STATUS_MAX] = {SEQ_OPR_ACL_OFF, SEQ_OPR_ACL_ON, SEQ_OPR_ACL_ON_HBM};
@@ -403,17 +314,10 @@ static int init_dimming(struct dsim_device *dsim, u8 * mtp, u8 * hbm)
 
 	dsim_info("%s init dimming info for S6E3FA3 panel\n", __func__);
 	diminfo = (void *)dimming_info;
-	panel->inter_aor_tbl = (unsigned char *)aor_table;
-
-	if (S6E3FA3_IS_7MASK(panel->id[0])) { //7mask panel
-		dsim_info("%s S6E3FA3 7mask panel init\n", __func__);
-		diminfo = (void *)dimming_info_7mask;
-		panel->inter_aor_tbl = (unsigned char *)aor_table_7mask;
-	}
-
 	panel->acl_opr_tbl = (unsigned char **)OPR_TABLE;
 
 	panel->br_tbl = (unsigned int *)br_tbl_420;
+	panel->inter_aor_tbl = (unsigned char *)aor_table;
 
 	panel->dim_data = (void *)dimming;
 	panel->dim_info = (void *)diminfo;
@@ -539,7 +443,7 @@ static int s6e3fa3_read_init_info(struct dsim_device *dsim, unsigned char *mtp, 
 	ret = dsim_read_hl_data(dsim, S6E3FA3_ID_REG, S6E3FA3_ID_LEN, dsim->priv.id);
 	if (ret != S6E3FA3_ID_LEN) {
 		dsim_err("%s : can't find connected panel. check panel connection\n", __func__);
-		panel->lcdConnected = PANEL_DISCONNECTED;
+		panel->lcdConnected = PANEL_DISCONNEDTED;
 		goto read_fail;
 	}
 
@@ -702,7 +606,7 @@ static int s6e3fa3_a8xe_probe(struct dsim_device *dsim)
 	dsim_info("%s : +\n", __func__);
 
 	ret = s6e3fa3_read_init_info(dsim, mtp, hbm);
-	if (panel->lcdConnected == PANEL_DISCONNECTED) {
+	if (panel->lcdConnected == PANEL_DISCONNEDTED) {
 		dsim_err("dsim : %s lcd was not connected\n", __func__);
 		goto probe_exit;
 	}
@@ -712,13 +616,13 @@ static int s6e3fa3_a8xe_probe(struct dsim_device *dsim)
 #ifdef CONFIG_PANEL_AID_DIMMING
 	ret = init_dimming(dsim, mtp, hbm);
 	if (ret) {
-		dsim_err("%s : failed to generate gamma table\n", __func__);
+		dsim_err("%s : failed to generate gamma tablen\n", __func__);
 	}
 #endif
 #ifdef CONFIG_LCD_HMT
 	ret = hmt_init_dimming(dsim, mtp);
 	if (ret) {
-		dsim_err("%s : failed to generate gamma table\n", __func__);
+		dsim_err("%s : failed to generate gamma tablen\n", __func__);
 	}
 #endif
 #ifdef CONFIG_EXYNOS_DECON_MDNIE_LITE
@@ -787,7 +691,6 @@ exit_err:
 
 static int s6e3fa3_a8xe_init(struct dsim_device *dsim)
 {
-	struct panel_private *panel = &dsim->priv;
 	int     ret = 0;
 
 	dsim_info("MDD : %s was called\n", __func__);
@@ -844,20 +747,13 @@ static int s6e3fa3_a8xe_init(struct dsim_device *dsim)
 		dsim_err("%s : fail to write CMD : SEQ_AVC_SETTING_1\n", __func__);
 		goto init_exit;
 	}
-	if (S6E3FA3_IS_8MASK(panel->id[0])) { //8mask
-		ret = dsim_write_hl_data(dsim, SEQ_AVC_SETTING_2, ARRAY_SIZE(SEQ_AVC_SETTING_2));
-		if (ret < 0) {
-			dsim_err("%s : fail to write CMD : SEQ_AVC_SETTING_2\n", __func__);
-			goto init_exit;
-		}
+
+	ret = dsim_write_hl_data(dsim, SEQ_AVC_SETTING_2, ARRAY_SIZE(SEQ_AVC_SETTING_2));
+	if (ret < 0) {
+		dsim_err("%s : fail to write CMD : SEQ_AVC_SETTING_2\n", __func__);
+		goto init_exit;
 	}
-	else {
-		ret = dsim_write_hl_data(dsim, SEQ_AVC_SETTING_2_7MASK, ARRAY_SIZE(SEQ_AVC_SETTING_2_7MASK));
-		if (ret < 0) {
-			dsim_err("%s : fail to write CMD : SEQ_AVC_SETTING_2_7MASK\n", __func__);
-			goto init_exit;
-		}
-	}
+
 	ret = dsim_write_hl_data(dsim, SEQ_ERR_FG_SETTING, ARRAY_SIZE(SEQ_ERR_FG_SETTING));
 	if (ret < 0) {
 		dsim_err("%s : fail to write CMD : SEQ_ERR_FG_SETTING\n", __func__);
@@ -888,31 +784,20 @@ static int s6e3fa3_a8xe_init(struct dsim_device *dsim)
 		dsim_err(":%s fail to write CMD : SEQ_GAMMA_CONDITION_SET\n", __func__);
 		goto init_exit;
 	}
-	if (S6E3FA3_IS_8MASK(panel->id[0])) { //8mask
-		ret = dsim_write_hl_data(dsim, SEQ_AID_SETTING, ARRAY_SIZE(SEQ_AID_SETTING));
-		if (ret < 0) {
-			dsim_err(":%s fail to write CMD : SEQ_AID_SETTING\n", __func__);
-			goto init_exit;
-		}
-	}
-	else { //7mask
-		ret = dsim_write_hl_data(dsim, SEQ_AID_SETTING_7MASK, ARRAY_SIZE(SEQ_AID_SETTING_7MASK));
-		if (ret < 0) {
-			dsim_err(":%s fail to write CMD : SEQ_AID_SETTING_7MASK\n", __func__);
-			goto init_exit;
-		}
+	ret = dsim_write_hl_data(dsim, SEQ_AID_SETTING, ARRAY_SIZE(SEQ_AID_SETTING));
+	if (ret < 0) {
+		dsim_err(":%s fail to write CMD : SEQ_AID_SETTING\n", __func__);
+		goto init_exit;
 	}
 	ret = dsim_write_hl_data(dsim, SEQ_ELVSS_SET, ARRAY_SIZE(SEQ_ELVSS_SET));
 	if (ret < 0) {
 		dsim_err(":%s fail to write CMD : SEQ_ELVSS_SET\n", __func__);
 		goto init_exit;
 	}
-	if (S6E3FA3_IS_8MASK(panel->id[0])) { //8mask
-		ret = dsim_write_hl_data(dsim, SEQ_VINT_SET, ARRAY_SIZE(SEQ_VINT_SET));
-		if (ret < 0) {
-			dsim_err(":%s fail to write CMD : SEQ_VINT_SET\n", __func__);
-			goto init_exit;
-		}
+	ret = dsim_write_hl_data(dsim, SEQ_VINT_SET, ARRAY_SIZE(SEQ_VINT_SET));
+	if (ret < 0) {
+		dsim_err(":%s fail to write CMD : SEQ_VINT_SET\n", __func__);
+		goto init_exit;
 	}
 	ret = dsim_write_hl_data(dsim, SEQ_GAMMA_UPDATE, ARRAY_SIZE(SEQ_GAMMA_UPDATE));
 	if (ret < 0) {

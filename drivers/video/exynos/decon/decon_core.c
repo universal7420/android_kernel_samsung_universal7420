@@ -146,7 +146,7 @@ static void tracing_mark_write( int pid, char id, char* str1, int value )
 		return;
 	}
 
-	trace_puts(buf);
+	//trace_puts(buf);
 }
 /*-----------------------------------------------------------------*/
 
@@ -1087,7 +1087,7 @@ static int decon_get_overlap_cnt(struct decon_device *decon,
 }
 #endif
 
-static void vpp_dump(struct decon_device *decon)
+void vpp_dump(struct decon_device *decon)
 {
 	int i;
 
@@ -1462,9 +1462,6 @@ int decon_enable(struct decon_device *decon)
 			}
 		}
 	}
-
-	if ((decon->id == 0) && (decon->state != DECON_STATE_LPD_EXIT_REQ))
-		flush_kthread_worker(&decon->update_regs_worker);
 #endif
 
 	if (decon->state != DECON_STATE_LPD_EXIT_REQ)
@@ -2096,16 +2093,12 @@ static inline u32 get_vpp_src_format_opaque(int id, u32 format)
 {
 	switch (format) {
 	case DECON_PIXEL_FORMAT_BGRA_8888:
-		decon_info("vpp(%d), format(0x%x)\n", id, format);
 		return DECON_PIXEL_FORMAT_BGRX_8888;
 	case DECON_PIXEL_FORMAT_RGBA_8888:
-		decon_info("vpp(%d), format(0x%x)\n", id, format);
 		return DECON_PIXEL_FORMAT_RGBX_8888;
 	case DECON_PIXEL_FORMAT_ABGR_8888:
-		decon_info("vpp(%d), format(0x%x)\n", id, format);
 		return DECON_PIXEL_FORMAT_XBGR_8888;
 	case DECON_PIXEL_FORMAT_ARGB_8888:
-		decon_info("vpp(%d), format(0x%x)\n", id, format);
 		return DECON_PIXEL_FORMAT_XRGB_8888;
 	default:
 		return format;
@@ -3954,33 +3947,6 @@ static void decon_update_regs_handler(struct kthread_work *work)
 	}
 }
 
-static int decon_validate_dma_mapping(struct decon_device *decon,
-		struct decon_win_config *win_config)
-{
-
-	int i;
-	struct decon_win_config *config;
-	if (decon->id)
-		return true;
-
-	for (i = 0; i < decon->pdata->max_win; i++) {
-		config = &win_config[i];
-		if (config->state != DECON_WIN_STATE_BUFFER)
-			continue;
-
-		if (config->idma_type == IDMA_G2) {
-			if (i != 6) {
-				decon_err("%s: IDMA2 is mapped to %d\n", __func__, i);
-				return false;
-			}
-		} else if (i == 6) {
-			decon_err("%s: %d is mapped to win[6]\n", __func__, config->idma_type);
-			return false;
-		}
-	}
-	return true;
-}
-
 static void decon_set_smart_dma_mapping(struct decon_device *decon,
 			struct decon_win_config *win_config)
 {
@@ -4337,11 +4303,6 @@ static int decon_set_win_config(struct decon_device *decon,
 	}
 windows_config:
 #endif
-	if (!decon_validate_dma_mapping(decon, win_config)) {
-		decon_err("%s: IDMA2 wrong mapping\n", __func__);
-		ret = -ENOMEM;
-		goto err;
-	}
 
 	regs = kzalloc(sizeof(struct decon_reg_data), GFP_KERNEL);
 	if (!regs) {
@@ -4570,7 +4531,7 @@ int decon_doze_enable(struct decon_device *decon)
 #endif
 
 #ifdef CONFIG_FB_WINDOW_UPDATE
-	if ((decon->pdata->out_type == DECON_OUT_DSI) && (decon->need_update)) {
+	if ((decon->out_type == DECON_OUT_DSI) && (decon->need_update)) {
 		decon->need_update = false;
 		decon->update_win.x = 0;
 		decon->update_win.y = 0;
@@ -4648,7 +4609,7 @@ int decon_doze_suspend(struct decon_device *decon)
 	iovmm_deactivate(decon->dev);
 
 	/* DMA protection disable must be happen on vpp domain is alive */
-	if (psr.out_type == DECON_OUT_DSI) {
+	if (decon->out_type == DECON_OUT_DSI) {
 		decon_set_protected_content(decon, NULL);
 		decon->vpp_usage_bitmask = 0;
 		decon_vpp_stop(decon, true);
@@ -4665,7 +4626,7 @@ int decon_doze_suspend(struct decon_device *decon)
 	decon_runtime_suspend(decon->dev);
 #endif
 
-	if (psr.out_type == DECON_OUT_DSI) {
+	if (decon->out_type == DECON_OUT_DSI) {
 #if 1
 		/* stop output device (mipi-dsi or hdmi) */
 		ret = v4l2_subdev_call(decon->output_sd, video, s_stream, DSIM_REQ_DOZE_SUSPEND);
@@ -4676,7 +4637,7 @@ int decon_doze_suspend(struct decon_device *decon)
 		}
 #endif
 	}
-	if (psr.out_type == DECON_OUT_DSI) {
+	if (decon->out_type == DECON_OUT_DSI) {
 		pm_relax(decon->dev);
 		dev_warn(decon->dev, "pm_relax");
 	}
@@ -4840,10 +4801,7 @@ static int decon_ioctl(struct fb_info *info, unsigned int cmd,
 		break;
 #ifdef CONFIG_LCD_DOZE_MODE
 	case S3CFB_POWER_MODE:
-		if (get_user(pwr_mode, (int __user *)arg)) {
-			ret = -EFAULT;
-			break;
-		}
+		pwr_mode = (u32)arg;
 		decon_info("%s : pwr mode : %d\n", __func__, pwr_mode);
 		switch (pwr_mode) {
 			case DECON_POWER_MODE_DOZE :
@@ -4853,7 +4811,6 @@ static int decon_ioctl(struct fb_info *info, unsigned int cmd,
 				ret = decon_doze_enable(decon);
 				if (ret) {
 					decon_err("ERR:%s:failed to decon_doze_enable():%d\n", __func__, ret);
-					ret = 0;
 				}
 				break;
 			case DECON_POWER_MODE_DOZE_SUSPEND :
@@ -4869,7 +4826,6 @@ static int decon_ioctl(struct fb_info *info, unsigned int cmd,
 						decon->ignore_vsync = false;
 						decon->vsync_backup = false;
 					}
-					ret = 0;
 				}
 				break;
 		}
