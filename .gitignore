@@ -91,3 +91,7 @@ extra_certificates
 signing_key.priv
 signing_key.x509
 x509.genkey
+
+fips_fmp_utils
+security/selinux/av_permissions.h
+security/selinux/flask.h
