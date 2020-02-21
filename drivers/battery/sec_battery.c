@@ -2978,67 +2978,6 @@ static void sec_bat_swelling_fullcharged_check(struct sec_battery_info *battery)
 }
 #endif
 
-static void sec_bat_calculate_safety_time(struct sec_battery_info *battery)
-{
-	unsigned long expired_time = battery->expired_time;
-	struct timespec ts = {0, };
-	int curr = 0;
-	int input_power = battery->current_max * battery->input_voltage * 1000;
-	int charging_power = battery->charging_current * battery->pdata->swelling_normal_float_voltage;
-
-	if (battery->lcd_status && battery->stop_timer) {
-		battery->prev_safety_time = 0;
-		return;
-	}
-
-	get_monotonic_boottime(&ts);
-
-	if (battery->prev_safety_time == 0) {
-		battery->prev_safety_time = ts.tv_sec;
-	}
-
-	if (input_power > charging_power) {
-		curr = battery->charging_current;
-	} else {
-		curr = input_power / battery->pdata->swelling_normal_float_voltage;
-		curr = (curr * 9) / 10;
-	}
-
-	if (battery->lcd_status && !battery->stop_timer) {
-		battery->stop_timer = true;
-	} else if (!battery->lcd_status && battery->stop_timer) {
-		battery->stop_timer = false;
-	}
-
-	pr_info("%s : EXPIRED_TIME(%ld), IP(%d), CP(%d), CURR(%d), STANDARD(%d)\n",
-		__func__, expired_time, input_power, charging_power, curr, battery->pdata->standard_curr);
-
-	/* We don't need to calculate the safety timer if charge current is 0 */
-	if (curr == 0) {
-		/* Update the prev_safety_time if the expired_time is still max */
-		if(battery->expired_time == battery->pdata->expired_time) {
-			battery->prev_safety_time = ts.tv_sec;
-		}
-		return;
-	}
-
-	expired_time = (expired_time * battery->pdata->standard_curr) / curr;
-
-	pr_info("%s : CAL_EXPIRED_TIME(%ld) TIME NOW(%ld) TIME PREV(%ld)\n", __func__, expired_time, ts.tv_sec, battery->prev_safety_time);
-
-	if (expired_time <= ((ts.tv_sec - battery->prev_safety_time) * 100))
-		expired_time = 0;
-	else
-		expired_time -= ((ts.tv_sec - battery->prev_safety_time) * 100);
-
-	battery->cal_safety_time = expired_time;
-	expired_time = (expired_time * curr) / battery->pdata->standard_curr;
-
-	battery->expired_time = expired_time;
-	battery->prev_safety_time = ts.tv_sec;
-	pr_info("%s : REMAIN_TIME(%ld) CAL_REMAIN_TIME(%ld)\n", __func__, battery->expired_time, battery->cal_safety_time);
-}
-
 #if defined(CONFIG_CALC_TIME_TO_FULL)
 static void sec_bat_calc_time_to_full(struct sec_battery_info * battery)
 {
