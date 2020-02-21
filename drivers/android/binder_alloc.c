@@ -48,14 +48,23 @@ module_param_named(debug_mask, binder_alloc_debug_mask,
 			pr_info(x); \
 	} while (0)
 
+static struct binder_buffer *binder_buffer_next(struct binder_buffer *buffer)
+{
+	return list_entry(buffer->entry.next, struct binder_buffer, entry);
+}
+
+static struct binder_buffer *binder_buffer_prev(struct binder_buffer *buffer)
+{
+	return list_entry(buffer->entry.prev, struct binder_buffer, entry);
+}
+
 static size_t binder_alloc_buffer_size(struct binder_alloc *alloc,
 				       struct binder_buffer *buffer)
 {
 	if (list_is_last(&buffer->entry, &alloc->buffers))
 		return alloc->buffer +
 		       alloc->buffer_size - (void *)buffer->data;
-	return (size_t)list_entry(buffer->entry.next,
-			  struct binder_buffer, entry) - (size_t)buffer->data;
+	return (size_t)binder_buffer_next(buffer) - (size_t)buffer->data;
 }
 
 static void binder_insert_free_buffer(struct binder_alloc *alloc,
@@ -335,8 +344,36 @@ struct binder_buffer *binder_alloc_new_buf_locked(struct binder_alloc *alloc,
 		}
 	}
 	if (best_fit == NULL) {
+		size_t allocated_buffers = 0;
+		size_t largest_alloc_size = 0;
+		size_t total_alloc_size = 0;
+		size_t free_buffers = 0;
+		size_t largest_free_size = 0;
+		size_t total_free_size = 0;
+
+		for (n = rb_first(&alloc->allocated_buffers); n != NULL;
+		     n = rb_next(n)) {
+			buffer = rb_entry(n, struct binder_buffer, rb_node);
+			buffer_size = binder_alloc_buffer_size(alloc, buffer);
+			allocated_buffers++;
+			total_alloc_size += buffer_size;
+			if (buffer_size > largest_alloc_size)
+				largest_alloc_size = buffer_size;
+		}
+		for (n = rb_first(&alloc->free_buffers); n != NULL;
+		     n = rb_next(n)) {
+			buffer = rb_entry(n, struct binder_buffer, rb_node);
+			buffer_size = binder_alloc_buffer_size(alloc, buffer);
+			free_buffers++;
+			total_free_size += buffer_size;
+			if (buffer_size > largest_free_size)
+				largest_free_size = buffer_size;
+		}
 		pr_err("%d: binder_alloc_buf size %zd failed, no address space\n",
 			alloc->pid, size);
+		pr_err("allocated: %zd (num: %zd largest: %zd), free: %zd (num: %zd largest: %zd)\n",
+		       total_alloc_size, allocated_buffers, largest_alloc_size,
+		       total_free_size, free_buffers, largest_free_size);
 		return ERR_PTR(-ENOSPC);
 	}
 	if (n == NULL) {
@@ -367,7 +404,6 @@ struct binder_buffer *binder_alloc_new_buf_locked(struct binder_alloc *alloc,
 
 	rb_erase(best_fit, &alloc->free_buffers);
 	buffer->free = 0;
-	buffer->free_in_progress = 0;
 	binder_insert_allocated_buffer_locked(alloc, buffer);
 	if (buffer_size != size) {
 		struct binder_buffer *new_buffer = (void *)buffer->data + size;
@@ -376,14 +412,7 @@ struct binder_buffer *binder_alloc_new_buf_locked(struct binder_alloc *alloc,
 		new_buffer->free = 1;
 		binder_insert_free_buffer(alloc, new_buffer);
 	}
-<<<<<<< HEAD
-=======
 
-	rb_erase(best_fit, &alloc->free_buffers);
-	buffer->free = 0;
-	buffer->allow_user_free = 0;
-	binder_insert_allocated_buffer_locked(alloc, buffer);
->>>>>>> 03c0215... UPSTREAM: binder: fix race that allows malicious free of live buffer
 	binder_alloc_debug(BINDER_DEBUG_BUFFER_ALLOC,
 		     "%d: binder_alloc_buf size %zd got %pK\n",
 		      alloc->pid, size, buffer);
@@ -448,7 +477,7 @@ static void binder_delete_free_buffer(struct binder_alloc *alloc,
 	int free_page_start = 1;
 
 	BUG_ON(alloc->buffers.next == &buffer->entry);
-	prev = list_entry(buffer->entry.prev, struct binder_buffer, entry);
+	prev = binder_buffer_prev(buffer);
 	BUG_ON(!prev->free);
 	if (buffer_end_page(prev) == buffer_start_page(buffer)) {
 		free_page_start = 0;
@@ -460,8 +489,7 @@ static void binder_delete_free_buffer(struct binder_alloc *alloc,
 	}
 
 	if (!list_is_last(&buffer->entry, &alloc->buffers)) {
-		next = list_entry(buffer->entry.next,
-				  struct binder_buffer, entry);
+		next = binder_buffer_next(buffer);
 		if (buffer_start_page(next) == buffer_end_page(buffer)) {
 			free_page_end = 0;
 			if (buffer_start_page(next) ==
@@ -522,8 +550,7 @@ static void binder_free_buf_locked(struct binder_alloc *alloc,
 	rb_erase(&buffer->rb_node, &alloc->allocated_buffers);
 	buffer->free = 1;
 	if (!list_is_last(&buffer->entry, &alloc->buffers)) {
-		struct binder_buffer *next = list_entry(buffer->entry.next,
-						struct binder_buffer, entry);
+		struct binder_buffer *next = binder_buffer_next(buffer);
 
 		if (next->free) {
 			rb_erase(&next->rb_node, &alloc->free_buffers);
@@ -531,8 +558,7 @@ static void binder_free_buf_locked(struct binder_alloc *alloc,
 		}
 	}
 	if (alloc->buffers.next != &buffer->entry) {
-		struct binder_buffer *prev = list_entry(buffer->entry.prev,
-						struct binder_buffer, entry);
+		struct binder_buffer *prev = binder_buffer_prev(buffer);
 
 		if (prev->free) {
 			binder_delete_free_buffer(alloc, buffer);
@@ -704,9 +730,10 @@ void binder_alloc_deferred_release(struct binder_alloc *alloc)
 static void print_binder_buffer(struct seq_file *m, const char *prefix,
 				struct binder_buffer *buffer)
 {
-	seq_printf(m, "%s %d: %pK size %zd:%zd %s\n",
+	seq_printf(m, "%s %d: %pK size %zd:%zd:%zd %s\n",
 		   prefix, buffer->debug_id, buffer->data,
 		   buffer->data_size, buffer->offsets_size,
+		   buffer->extra_buffers_size,
 		   buffer->transaction ? "active" : "delivered");
 }
 
