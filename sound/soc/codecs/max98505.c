@@ -307,22 +307,20 @@ struct snd_soc_codec *max98505_codec;
 int get_speaker_gain(void)
 {
 	struct max98505_priv *max98505 = snd_soc_codec_get_drvdata(max98505_codec);
-	struct max98505_pdata *pdata = max98505->pdata;
 
-	return pdata->vstep.vol_step;
+	return max98505->volume;
 }
 
 int set_speaker_gain(int gain)
 {
 	struct max98505_priv *max98505 = snd_soc_codec_get_drvdata(max98505_codec);
-	struct max98505_pdata *pdata = max98505->pdata;
 
 	max98505_regmap_update_bits(max98505, MAX98505_R02D_GAIN,
 			MAX98505_SPK_GAIN_MASK, gain << MAX98505_SPK_GAIN_SHIFT);
 
-	pdata->vstep.vol_step = gain;
+	max98505->volume = gain;
 
-	return pdata->vstep.vol_step;
+	return max98505->volume;
 }
 #endif
 
